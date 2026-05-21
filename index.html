@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Buddy | Grocery Intelligence</title>
+  <meta name="description" content="Live grocery price comparison, weekly ad intel, and store finder. Scout prices across Walmart, Fred Meyer, Safeway, WinCo, and Grocery Outlet." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #030810;
+      --panel: #0a0f1e;
+      --border: #1a2235;
+      --green: #39ff14;
+      --yellow: #FFE600;
+      --cyan: #00bbc3;
+      --text: #dde7e7;
+      --muted: #6b7a8d;
+      --red: #ff4444;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+    .logo-icon { width: 36px; height: 36px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--green); letter-spacing: 0.05em; }
+    .logo-text span { color: var(--text); }
+    .status-badge { display: flex; align-items: center; gap: 0.4rem; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--green); }
+    .status-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #0a0f1e 0%, #030810 60%);
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--green); letter-spacing: 0.2em; margin-bottom: 0.75rem; }
+    .hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+    .hero h1 span { color: var(--green); }
+    .hero p { color: var(--muted); font-size: 1rem; max-width: 500px; margin: 0 auto; }
+
+    /* TABS */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--panel); overflow-x: auto; }
+    .tab-btn {
+      flex: 1; min-width: 130px; padding: 1rem 1.25rem;
+      background: none; border: none; border-bottom: 3px solid transparent;
+      color: var(--muted); font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--green); border-bottom-color: var(--green); background: rgba(57,255,20,0.05); }
+
+    /* CONTENT */
+    .content { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* INPUTS */
+    .input-group { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tac-input {
+      flex: 1; min-width: 200px;
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--text); padding: 0.75rem 1rem;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.875rem;
+      outline: none; transition: border-color 0.15s;
+    }
+    .tac-input::placeholder { color: var(--yellow); }
+    .tac-input:focus { border-color: var(--cyan); }
+
+    .btn-primary {
+      background: var(--green); color: #000; border: none;
+      padding: 0.75rem 1.5rem; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 0.1em;
+      cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent; color: var(--cyan); border: 1px solid var(--cyan);
+      padding: 0.6rem 1.25rem; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-secondary:hover { background: rgba(0,187,195,0.1); }
+
+    .section-label { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--yellow); letter-spacing: 0.15em; margin-bottom: 0.75rem; }
+
+    /* RESULTS */
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .result-card { background: var(--panel); border: 1px solid var(--border); padding: 1rem; transition: border-color 0.2s; }
+    .result-card:hover { border-color: var(--cyan); }
+    .result-store { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--cyan); letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .result-name { font-size: 0.85rem; color: var(--text); margin-bottom: 0.5rem; line-height: 1.3; }
+    .result-price { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--green); }
+    .result-price.best { color: var(--yellow); }
+    .best-badge { display: inline-block; background: var(--yellow); color: #000; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; vertical-align: middle; }
+
+    /* STORE GRID */
+    .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .store-card { background: var(--panel); border: 1px solid var(--border); padding: 1.25rem; text-align: center; transition: border-color 0.2s, transform 0.2s; }
+    .store-card:hover { border-color: var(--green); transform: translateY(-2px); }
+    .store-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .store-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .store-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.4; }
+
+    /* AD GRID */
+    .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .ad-card { background: var(--panel); border: 1px solid var(--border); padding: 1.25rem; transition: border-color 0.2s; }
+    .ad-card:hover { border-color: var(--yellow); }
+    .ad-store-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--yellow); margin-bottom: 0.25rem; }
+    .ad-description { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.4; }
+
+    /* SUMMARY BAR */
+    .summary-bar {
+      background: rgba(57,255,20,0.05); border: 1px solid rgba(57,255,20,0.2);
+      padding: 0.75rem 1rem; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .summary-item { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--green); }
+    .summary-item span { color: var(--yellow); }
+
+    /* STATES */
+    .loading { text-align: center; padding: 2.5rem; font-family: 'Share Tech Mono', monospace; color: var(--cyan); font-size: 0.85rem; }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; }
+    .error-msg { background: rgba(255,68,68,0.1); border: 1px solid var(--red); color: var(--red); padding: 0.75rem 1rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; margin-top: 1rem; }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 2rem; border-top: 1px solid var(--border); margin-top: 3rem; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+    footer a { color: var(--cyan); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .input-group { flex-direction: column; }
+      .btn-primary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="https://tripbuddy.pro" class="logo">
+      <div class="logo-icon">🥦</div>
+      <div class="logo-text">FOOD<span>BUDDY</span></div>
+    </a>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      INTEL ACTIVE
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-tag">// GROCERY INTELLIGENCE SYSTEM //</div>
+    <h1>Shop <span>Smarter.</span> Save More.</h1>
+    <p>Live price comparison, weekly ad intel, and store finder — all in one place.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('prices', this)">💰 PRICE SCOUT</button>
+    <button class="tab-btn" onclick="switchTab('weekly', this)">📋 WEEKLY ADS</button>
+    <button class="tab-btn" onclick="switchTab('stores', this)">📍 STORE FINDER</button>
+  </div>
+
+  <div class="content">
+
+    <!-- PRICE SCOUT -->
+    <div id="tab-prices" class="tab-panel active">
+      <div class="section-label">// PRICE SCOUT — COMPARE LIVE GROCERY PRICES //</div>
+      <div class="input-group">
+        <input type="text" id="price-query" class="tac-input" placeholder="e.g. milk, eggs, bread, chicken..." />
+        <button class="btn-primary" onclick="searchPrices()" id="price-btn">SCOUT PRICES</button>
+      </div>
+      <div id="price-results">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <p>Enter a grocery item above to compare live prices across stores</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEKLY ADS -->
+    <div id="tab-weekly" class="tab-panel">
+      <div class="section-label">// WEEKLY AD INTEL — THIS WEEK'S BEST DEALS //</div>
+      <div class="ad-grid">
+        <div class="ad-card">
+          <div class="ad-store-name">🛒 Walmart</div>
+          <div class="ad-description">Browse this week's rollback prices and special buys across all departments.</div>
+          <a href="https://www.walmart.com/store/finder" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-store-name">🏪 Safeway</div>
+          <div class="ad-description">Weekly specials, club card deals, and digital coupons available now.</div>
+          <a href="https://www.safeway.com/weeklyad" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-store-name">🛍️ Fred Meyer</div>
+          <div class="ad-description">Fred Meyer weekly ad with grocery, fuel, and general merchandise deals.</div>
+          <a href="https://www.fredmeyer.com/weeklyad" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-store-name">💰 Grocery Outlet</div>
+          <div class="ad-description">Extreme value deals — up to 60% off name brands. New deals every week.</div>
+          <a href="https://www.groceryoutlet.com/circulars/storeid/152" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-store-name">🌾 WinCo Foods</div>
+          <div class="ad-description">Employee-owned, warehouse-style savings. Check current weekly specials.</div>
+          <a href="https://www.wincofoods.com/stores" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+        </div>
+        <div class="ad-card">
+          <div class="ad-store-name">🍖 Chef Store</div>
+          <div class="ad-description">Restaurant supply pricing open to the public. Bulk savings on quality items.</div>
+          <a href="https://www.chefstore.com/locations/store/portland-587/" target="_blank" rel="noopener" class="btn-secondary">VIEW STORE →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- STORE FINDER -->
+    <div id="tab-stores" class="tab-panel">
+      <div class="section-label">// STORE FINDER — LOCATE NEARBY GROCERY STORES //</div>
+      <div class="input-group">
+        <input type="text" id="zip-input" class="tac-input" placeholder="Enter your zip code e.g. 97201..." maxlength="10" />
+        <button class="btn-primary" onclick="findStores()" id="store-btn">FIND STORES</button>
+      </div>
+      <div id="store-results">
+        <div class="empty-state">
+          <div class="empty-icon">📍</div>
+          <p>Enter your zip code to find nearby grocery stores</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>FOOD BUDDY INTELLIGENCE SYSTEM // <a href="https://tripbuddy.pro">TRIPBUDDY.PRO</a> // POWERED BY SCRAPINGBEE</p>
+  </footer>
+
+  <script>
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    async function searchPrices() {
+      const query = document.getElementById('price-query').value.trim();
+      if (!query) return;
+      const btn = document.getElementById('price-btn');
+      const resultsEl = document.getElementById('price-results');
+      btn.disabled = true;
+      btn.textContent = 'SCOUTING...';
+      resultsEl.innerHTML = '<div class="loading">SCANNING STORES FOR ' + query.toUpperCase() + '...</div>';
+
+      try {
+        const res = await fetch('/.netlify/functions/scrape?action=prices&query=' + encodeURIComponent(query));
+        const data = await res.json();
+
+        if (!data.results || data.results.length === 0) {
+          resultsEl.innerHTML = '<div class="error-msg">No price data found for "' + query + '". Try a more common item name.</div>';
+          return;
+        }
+
+        const prices = data.results.map(r => parseFloat(r.price.replace('$',''))).filter(p => !isNaN(p));
+        const lowestPrice = Math.min(...prices);
+
+        let html = '<div class="summary-bar">'
+          + '<div class="summary-item">QUERY: <span>' + query.toUpperCase() + '</span></div>'
+          + '<div class="summary-item">RESULTS: <span>' + data.results.length + '</span></div>'
+          + '<div class="summary-item">BEST PRICE: <span>$' + lowestPrice.toFixed(2) + '</span></div>'
+          + '<div class="summary-item">UPDATED: <span>' + new Date(data.timestamp).toLocaleTimeString() + '</span></div>'
+          + '</div><div class="results-grid">';
+
+        data.results.forEach(item => {
+          const price = parseFloat(item.price.replace('$',''));
+          const isBest = price === lowestPrice;
+          html += '<div class="result-card">'
+            + '<div class="result-store">' + item.store.toUpperCase() + '</div>'
+            + '<div class="result-name">' + item.name + '</div>'
+            + '<div class="result-price' + (isBest ? ' best' : '') + '">'
+            + item.price
+            + (isBest ? '<span class="best-badge">BEST PRICE</span>' : '')
+            + '</div></div>';
+        });
+        html += '</div>';
+        resultsEl.innerHTML = html;
+
+      } catch (err) {
+        resultsEl.innerHTML = '<div class="error-msg">SCOUT FAILED: ' + err.message + '</div>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'SCOUT PRICES';
+      }
+    }
+
+    function findStores() {
+      const zip = document.getElementById('zip-input').value.trim();
+      if (!zip) return;
+      const resultsEl = document.getElementById('store-results');
+
+      const stores = [
+        { name: 'Walmart', icon: '🛒', url: 'https://www.walmart.com/store/finder?query=' + zip, desc: 'Supercenter & Neighborhood Market locations' },
+        { name: 'Safeway', icon: '🏪', url: 'https://local.safeway.com/search.html?q=' + zip, desc: 'Full-service grocery with pharmacy' },
+        { name: 'Fred Meyer', icon: '🛍️', url: 'https://www.fredmeyer.com/stores/search?searchText=' + zip, desc: 'One-stop shop: grocery, fuel & more' },
+        { name: 'Grocery Outlet', icon: '💰', url: 'https://www.groceryoutlet.com/store-locator?zip=' + zip, desc: 'Extreme value on name brand items' },
+        { name: 'WinCo Foods', icon: '🌾', url: 'https://www.wincofoods.com/stores', desc: 'Employee-owned warehouse savings' },
+        { name: 'Chef Store', icon: '🍖', url: 'https://www.chefstore.com/locations/store/portland-587/', desc: 'Restaurant supply open to public' }
+      ];
+
+      let html = '<div class="summary-bar">'
+        + '<div class="summary-item">ZIP CODE: <span>' + zip + '</span></div>'
+        + '<div class="summary-item">STORES: <span>' + stores.length + '</span></div>'
+        + '</div><div class="store-grid">';
+
+      stores.forEach(s => {
+        html += '<div class="store-card">'
+          + '<div class="store-icon">' + s.icon + '</div>'
+          + '<div class="store-name">' + s.name + '</div>'
+          + '<div class="store-desc">' + s.desc + '</div>'
+          + '<a href="' + s.url + '" target="_blank" rel="noopener" class="btn-secondary">FIND LOCATION →</a>'
+          + '</div>';
+      });
+      html += '</div>';
+      resultsEl.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('price-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchPrices(); });
+      document.getElementById('zip-input').addEventListener('keydown', e => { if (e.key === 'Enter') findStores(); });
+    });
+  </script>
+
+</body>
+</html>
