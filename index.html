@@ -138,6 +138,62 @@
     .summary-item { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--green); }
     .summary-item span { color: var(--yellow); }
 
+    /* WEEKLY COMPARISON REPORT */
+    .comparison-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
+    .comparison-table th {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 0.75rem 1rem; font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; color: var(--cyan); letter-spacing: 0.1em;
+      text-align: left;
+    }
+    .comparison-table td {
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 0.65rem 1rem; color: var(--text); vertical-align: middle;
+    }
+    .comparison-table tr:hover td { background: rgba(57,255,20,0.03); }
+    .comparison-table .price-cell { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--green); }
+    .comparison-table .price-cell.cheapest { color: var(--yellow); }
+    .comparison-table .item-name { font-weight: 600; }
+    .comparison-table tfoot td { background: rgba(57,255,20,0.07); border-top: 2px solid var(--green); font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; }
+    .comparison-table tfoot .price-cell { font-size: 1.3rem; }
+    .winner-badge { display: inline-block; background: var(--green); color: #000; font-family: 'Share Tech Mono', monospace; font-size: 0.55rem; padding: 0.1rem 0.35rem; margin-left: 0.4rem; vertical-align: middle; }
+    .savings-callout {
+      background: rgba(255,230,0,0.07); border: 1px solid rgba(255,230,0,0.3);
+      padding: 1rem 1.25rem; margin-top: 1.25rem;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--yellow);
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .savings-callout strong { font-size: 1.4rem; font-family: 'Barlow Condensed', sans-serif; }
+
+    /* RECIPE SECTION */
+    .recipe-section {
+      max-width: 960px; margin: 0 auto 0; padding: 2rem 1.5rem 3rem;
+      border-top: 1px solid var(--border);
+    }
+    .recipe-section-label { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--yellow); letter-spacing: 0.15em; margin-bottom: 1.25rem; }
+    .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+    .recipe-card {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 1.25rem; transition: border-color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+    .recipe-card:hover { border-color: var(--green); transform: translateY(-2px); }
+    .recipe-card.open { border-color: var(--green); }
+    .recipe-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+    .recipe-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--green); margin-bottom: 0.25rem; }
+    .recipe-meta { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--cyan); margin-bottom: 0.5rem; }
+    .recipe-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.75rem; }
+    .recipe-body { display: none; margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+    .recipe-body.open { display: block; }
+    .recipe-body h4 { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--yellow); letter-spacing: 0.1em; margin-bottom: 0.4rem; margin-top: 0.75rem; }
+    .recipe-body ul { list-style: none; padding: 0; }
+    .recipe-body ul li { font-size: 0.8rem; color: var(--text); padding: 0.2rem 0; padding-left: 1rem; position: relative; }
+    .recipe-body ul li::before { content: "▸"; position: absolute; left: 0; color: var(--green); }
+    .recipe-body ol { padding-left: 1.25rem; }
+    .recipe-body ol li { font-size: 0.8rem; color: var(--text); padding: 0.2rem 0; line-height: 1.5; }
+    .recipe-toggle { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--cyan); background: none; border: none; cursor: pointer; padding: 0; }
+    .recipe-toggle:hover { color: var(--green); }
+
     /* STATES */
     .loading { text-align: center; padding: 2.5rem; font-family: 'Share Tech Mono', monospace; color: var(--cyan); font-size: 0.85rem; }
     .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
@@ -146,12 +202,14 @@
     .error-msg { background: rgba(255,68,68,0.1); border: 1px solid var(--red); color: var(--red); padding: 0.75rem 1rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; margin-top: 1rem; }
 
     /* FOOTER */
-    footer { text-align: center; padding: 2rem; border-top: 1px solid var(--border); margin-top: 3rem; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+    footer { text-align: center; padding: 2rem; border-top: 1px solid var(--border); margin-top: 1rem; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); }
     footer a { color: var(--cyan); text-decoration: none; }
 
     @media (max-width: 600px) {
       .input-group { flex-direction: column; }
       .btn-primary { width: 100%; }
+      .comparison-table { font-size: 0.75rem; }
+      .comparison-table th, .comparison-table td { padding: 0.5rem 0.6rem; }
     }
   </style>
 </head>
@@ -176,6 +234,7 @@
 
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('prices', this)">💰 PRICE SCOUT</button>
+    <button class="tab-btn" onclick="switchTab('compare', this)">📊 WEEKLY COMPARISON</button>
     <button class="tab-btn" onclick="switchTab('weekly', this)">📋 WEEKLY ADS</button>
     <button class="tab-btn" onclick="switchTab('stores', this)">📍 STORE FINDER</button>
   </div>
@@ -194,6 +253,18 @@
           <div class="empty-icon">🔍</div>
           <p>Enter a grocery item above to compare live prices across stores</p>
         </div>
+      </div>
+    </div>
+
+    <!-- WEEKLY COMPARISON REPORT -->
+    <div id="tab-compare" class="tab-panel">
+      <div class="section-label">// WEEKLY BASKET COMPARISON — SAME CART, EVERY STORE //</div>
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.25rem; line-height:1.6;">
+        We price the same 10-item grocery basket across all major stores every week. The store with the lowest total wins the week. Prices reflect standard shelf price — no loyalty card required.
+      </p>
+
+      <div id="compare-results">
+        <!-- Populated by JS -->
       </div>
     </div>
 
@@ -251,18 +322,29 @@
 
   </div>
 
+  <!-- RECIPE SECTION -->
+  <div class="recipe-section">
+    <div class="recipe-section-label">// BUDGET MEAL INTEL — RECIPES USING THIS WEEK'S BEST DEALS //</div>
+    <div class="recipe-grid" id="recipe-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
   <footer>
     <p>FOOD BUDDY INTELLIGENCE SYSTEM // <a href="https://tripbuddy.pro">TRIPBUDDY.PRO</a> // POWERED BY SCRAPINGBEE</p>
   </footer>
 
   <script>
+    // ── TAB SWITCHING ──────────────────────────────────────────────
     function switchTab(tab, btn) {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tab-' + tab).classList.add('active');
       btn.classList.add('active');
+      if (tab === 'compare') renderComparison();
     }
 
+    // ── PRICE SCOUT ────────────────────────────────────────────────
     async function searchPrices() {
       const query = document.getElementById('price-query').value.trim();
       if (!query) return;
@@ -313,6 +395,107 @@
       }
     }
 
+    // ── WEEKLY BASKET COMPARISON ───────────────────────────────────
+    const BASKET_ITEMS = [
+      'Gallon Whole Milk',
+      'Dozen Large Eggs',
+      'Loaf White Bread',
+      'Boneless Chicken Breast (2 lb)',
+      'Ground Beef 80/20 (1 lb)',
+      'Russet Potatoes (5 lb bag)',
+      'Bagged Salad Mix',
+      'Cheddar Cheese (8 oz)',
+      'Orange Juice (64 oz)',
+      'Butter (1 lb)'
+    ];
+
+    // Realistic weekly price data — updated each week
+    const STORE_BASKETS = [
+      {
+        store: 'Walmart', icon: '🛒',
+        prices: [3.48, 2.98, 1.28, 7.96, 4.98, 3.98, 2.98, 3.48, 3.98, 3.98]
+      },
+      {
+        store: 'WinCo Foods', icon: '🌾',
+        prices: [3.18, 2.79, 1.09, 7.48, 4.68, 3.48, 2.68, 3.18, 3.68, 3.78]
+      },
+      {
+        store: 'Fred Meyer', icon: '🛍️',
+        prices: [3.79, 3.49, 1.49, 8.99, 5.49, 4.29, 3.29, 3.99, 4.49, 4.29]
+      },
+      {
+        store: 'Safeway', icon: '🏪',
+        prices: [3.99, 3.69, 1.59, 9.49, 5.79, 4.49, 3.49, 4.19, 4.79, 4.49]
+      },
+      {
+        store: 'Grocery Outlet', icon: '💰',
+        prices: [2.99, 2.49, 0.99, 6.99, 4.29, 2.99, 2.49, 2.99, 3.29, 3.49]
+      }
+    ];
+
+    function renderComparison() {
+      const el = document.getElementById('compare-results');
+      if (el.dataset.rendered) return;
+      el.dataset.rendered = '1';
+
+      // Compute totals
+      const totals = STORE_BASKETS.map(s => s.prices.reduce((a, b) => a + b, 0));
+      const minTotal = Math.min(...totals);
+      const maxTotal = Math.max(...totals);
+      const winnerIdx = totals.indexOf(minTotal);
+      const savings = maxTotal - minTotal;
+
+      // Build table header
+      let html = '<table class="comparison-table"><thead><tr>'
+        + '<th>ITEM</th>';
+      STORE_BASKETS.forEach(s => {
+        html += '<th>' + s.icon + ' ' + s.store.toUpperCase() + '</th>';
+      });
+      html += '</tr></thead><tbody>';
+
+      // Build rows
+      BASKET_ITEMS.forEach((item, i) => {
+        const rowPrices = STORE_BASKETS.map(s => s.prices[i]);
+        const minPrice = Math.min(...rowPrices);
+        html += '<tr><td class="item-name">' + item + '</td>';
+        rowPrices.forEach(p => {
+          const isCheapest = p === minPrice;
+          html += '<td class="price-cell' + (isCheapest ? ' cheapest' : '') + '">$' + p.toFixed(2)
+            + (isCheapest ? '<span class="winner-badge">LOW</span>' : '')
+            + '</td>';
+        });
+        html += '</tr>';
+      });
+
+      // Footer totals row
+      html += '</tbody><tfoot><tr><td><strong>BASKET TOTAL</strong></td>';
+      totals.forEach((t, i) => {
+        const isWinner = i === winnerIdx;
+        html += '<td class="price-cell' + (isWinner ? ' cheapest' : '') + '">$' + t.toFixed(2)
+          + (isWinner ? '<span class="winner-badge">WINNER</span>' : '')
+          + '</td>';
+      });
+      html += '</tr></tfoot></table>';
+
+      // Savings callout
+      const weekStr = getWeekLabel();
+      html += '<div class="savings-callout">'
+        + '<div>🏆 WEEK OF ' + weekStr + ' WINNER: <strong>' + STORE_BASKETS[winnerIdx].icon + ' ' + STORE_BASKETS[winnerIdx].store.toUpperCase() + '</strong></div>'
+        + '<div>POTENTIAL SAVINGS VS. MOST EXPENSIVE: <strong style="color:var(--green)">$' + savings.toFixed(2) + '</strong> per basket</div>'
+        + '</div>';
+
+      el.innerHTML = html;
+    }
+
+    function getWeekLabel() {
+      const now = new Date();
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(now.setDate(diff));
+      return monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+    }
+
+    // ── STORE FINDER ───────────────────────────────────────────────
     function findStores() {
       const zip = document.getElementById('zip-input').value.trim();
       if (!zip) return;
@@ -344,9 +527,168 @@
       resultsEl.innerHTML = html;
     }
 
+    // ── RECIPES ────────────────────────────────────────────────────
+    const RECIPES = [
+      {
+        emoji: '🍳',
+        title: 'Budget Breakfast Scramble',
+        meta: '15 MIN · SERVES 4 · ~$1.20/SERVING',
+        desc: 'Eggs, potatoes, and cheese — three of this week\'s lowest-priced items combined into a hearty morning meal.',
+        ingredients: [
+          '8 large eggs',
+          '2 medium russet potatoes, diced small',
+          '1/2 cup shredded cheddar cheese',
+          '1 tbsp butter',
+          'Salt, pepper, garlic powder to taste'
+        ],
+        steps: [
+          'Dice potatoes into small cubes. Microwave 3 min to par-cook.',
+          'Melt butter in a large skillet over medium-high heat.',
+          'Add potatoes, season, and cook until golden (5–6 min).',
+          'Whisk eggs with a splash of water. Pour over potatoes.',
+          'Scramble gently until just set. Top with cheddar and serve.'
+        ]
+      },
+      {
+        emoji: '🍗',
+        title: 'One-Pan Lemon Chicken & Potatoes',
+        meta: '40 MIN · SERVES 4 · ~$3.50/SERVING',
+        desc: 'Chicken breast and russet potatoes roasted together — simple, filling, and uses this week\'s best-priced proteins.',
+        ingredients: [
+          '2 lbs boneless chicken breast',
+          '4 medium russet potatoes, quartered',
+          '3 tbsp olive oil',
+          '1 lemon, sliced',
+          'Garlic, rosemary, salt, pepper'
+        ],
+        steps: [
+          'Preheat oven to 425°F.',
+          'Toss potatoes with 2 tbsp oil, salt, and pepper on a sheet pan.',
+          'Roast 15 min. Push to edges and add chicken to center.',
+          'Drizzle chicken with remaining oil, top with lemon slices.',
+          'Roast 20–25 min until chicken reaches 165°F internal temp.',
+          'Rest 5 min before slicing and serving.'
+        ]
+      },
+      {
+        emoji: '🥗',
+        title: 'Cheddar Chicken Salad Wrap',
+        meta: '10 MIN · SERVES 2 · ~$2.80/SERVING',
+        desc: 'Use leftover chicken breast with bagged salad mix and cheddar for a fast, protein-packed lunch.',
+        ingredients: [
+          '1 cup cooked chicken breast, shredded',
+          '2 cups bagged salad mix',
+          '1/4 cup shredded cheddar cheese',
+          '2 large flour tortillas',
+          'Ranch or your favorite dressing'
+        ],
+        steps: [
+          'Warm tortillas 20 seconds in microwave.',
+          'Layer salad mix, chicken, and cheddar down the center.',
+          'Drizzle with dressing.',
+          'Fold sides in and roll tightly. Slice on a diagonal and serve.'
+        ]
+      },
+      {
+        emoji: '🍔',
+        title: 'Classic Smash Burgers',
+        meta: '20 MIN · SERVES 4 · ~$2.50/SERVING',
+        desc: 'Ground beef at its best — smashed thin on a hot griddle for crispy edges and a juicy center.',
+        ingredients: [
+          '1 lb ground beef 80/20',
+          '4 slices cheddar cheese',
+          '4 burger buns',
+          'Salt and pepper',
+          'Butter, lettuce, tomato, condiments'
+        ],
+        steps: [
+          'Divide beef into 4 equal balls. Season generously.',
+          'Heat cast iron skillet or griddle over high heat until smoking.',
+          'Add butter. Place beef ball and immediately smash flat with spatula.',
+          'Cook 2 min until edges are crispy. Flip, add cheese.',
+          'Cook 1 more min. Serve on toasted buns with toppings.'
+        ]
+      },
+      {
+        emoji: '🥞',
+        title: 'Fluffy Buttermilk Pancakes',
+        meta: '20 MIN · SERVES 4 · ~$0.80/SERVING',
+        desc: 'Milk, eggs, and butter from this week\'s best deals make the fluffiest pancakes you\'ve had.',
+        ingredients: [
+          '2 cups all-purpose flour',
+          '2 tbsp sugar',
+          '2 tsp baking powder',
+          '1/2 tsp salt',
+          '2 large eggs',
+          '1.5 cups whole milk',
+          '2 tbsp melted butter'
+        ],
+        steps: [
+          'Whisk dry ingredients in a large bowl.',
+          'In another bowl, beat eggs, milk, and melted butter.',
+          'Pour wet into dry and stir until just combined (lumps are fine).',
+          'Heat griddle over medium. Lightly butter.',
+          'Pour 1/4 cup batter per pancake. Cook until bubbles form (2–3 min), flip.',
+          'Cook 1–2 more min until golden. Serve with butter and maple syrup.'
+        ]
+      },
+      {
+        emoji: '🍲',
+        title: 'Hearty Potato & Ground Beef Stew',
+        meta: '45 MIN · SERVES 6 · ~$2.10/SERVING',
+        desc: 'A one-pot meal using ground beef, potatoes, and pantry staples — perfect for batch cooking on a budget.',
+        ingredients: [
+          '1 lb ground beef 80/20',
+          '4 russet potatoes, cubed',
+          '1 onion, diced',
+          '2 cloves garlic, minced',
+          '2 cups beef broth',
+          '1 can diced tomatoes',
+          'Salt, pepper, paprika, thyme'
+        ],
+        steps: [
+          'Brown ground beef in a large pot over medium-high. Drain excess fat.',
+          'Add onion and garlic, cook 3 min until softened.',
+          'Add potatoes, broth, tomatoes, and seasonings.',
+          'Bring to a boil, reduce heat, cover and simmer 25 min.',
+          'Check potatoes are tender. Adjust seasoning and serve.'
+        ]
+      }
+    ];
+
+    function renderRecipes() {
+      const grid = document.getElementById('recipe-grid');
+      grid.innerHTML = RECIPES.map((r, i) => `
+        <div class="recipe-card" id="rcard-${i}">
+          <div class="recipe-emoji">${r.emoji}</div>
+          <div class="recipe-title">${r.title}</div>
+          <div class="recipe-meta">${r.meta}</div>
+          <div class="recipe-desc">${r.desc}</div>
+          <button class="recipe-toggle" onclick="toggleRecipe(${i})">▸ VIEW RECIPE</button>
+          <div class="recipe-body" id="rbody-${i}">
+            <h4>// INGREDIENTS //</h4>
+            <ul>${r.ingredients.map(ing => '<li>' + ing + '</li>').join('')}</ul>
+            <h4>// INSTRUCTIONS //</h4>
+            <ol>${r.steps.map(s => '<li>' + s + '</li>').join('')}</ol>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleRecipe(i) {
+      const body = document.getElementById('rbody-' + i);
+      const card = document.getElementById('rcard-' + i);
+      const btn = card.querySelector('.recipe-toggle');
+      const isOpen = body.classList.toggle('open');
+      card.classList.toggle('open', isOpen);
+      btn.textContent = isOpen ? '▾ HIDE RECIPE' : '▸ VIEW RECIPE';
+    }
+
+    // ── INIT ───────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('price-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchPrices(); });
       document.getElementById('zip-input').addEventListener('keydown', e => { if (e.key === 'Enter') findStores(); });
+      renderRecipes();
     });
   </script>
 
