@@ -115,6 +115,16 @@
     .badge-video { background: rgba(255,230,0,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
     .badge-both { background: rgba(57,255,20,0.15); color: var(--green); border: 1px solid var(--green); }
 
+    /* SOURCE LINK BUTTON */
+    .source-link-btn {
+      display: inline-block; margin-top: 1rem;
+      background: transparent; color: var(--yellow); border: 1px solid var(--yellow);
+      padding: 0.5rem 1.25rem; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .source-link-btn:hover { background: rgba(255,230,0,0.1); }
+
     /* FOOTER */
     footer { text-align: center; padding: 2rem; border-top: 1px solid var(--border); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); }
     footer a { color: var(--cyan); text-decoration: none; }
@@ -187,6 +197,14 @@
         <input type="text" id="input-video" class="tac-input" placeholder="https://www.youtube.com/watch?v=..." />
       </div>
 
+      <div class="form-group" style="margin-bottom:0.75rem">
+        <label>SOURCE LINK (optional — shows as a button on the post)</label>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          <input type="text" id="input-link-url" class="tac-input" placeholder="https://www.example.com/article..." style="flex:3;min-width:200px" />
+          <input type="text" id="input-link-label" class="tac-input" placeholder="Button label e.g. READ FULL STORY" style="flex:1;min-width:150px" />
+        </div>
+      </div>
+
       <div class="btn-row">
         <button class="btn-primary" onclick="addPost()">+ PUBLISH POST</button>
         <button class="btn-secondary" onclick="clearForm()">CLEAR</button>
@@ -244,6 +262,9 @@
         return;
       }
 
+      const linkUrl = document.getElementById('input-link-url').value.trim();
+      const linkLabel = document.getElementById('input-link-label').value.trim() || 'READ FULL STORY →';
+
       const post = {
         id: Date.now(),
         type: currentType,
@@ -251,7 +272,9 @@
         date,
         text: currentType !== 'video' ? text : '',
         videoUrl: currentType !== 'text' ? videoUrl : '',
-        embedUrl: currentType !== 'text' ? getEmbedUrl(videoUrl) : ''
+        embedUrl: currentType !== 'text' ? getEmbedUrl(videoUrl) : '',
+        linkUrl,
+        linkLabel
       };
 
       posts.unshift(post);
@@ -270,6 +293,8 @@
       document.getElementById('input-date').value = '';
       document.getElementById('input-text').value = '';
       document.getElementById('input-video').value = '';
+      document.getElementById('input-link-url').value = '';
+      document.getElementById('input-link-label').value = '';
     }
 
     // ── DELETE POST ────────────────────────────────────────────────
@@ -283,6 +308,12 @@
     // ── SAVE ───────────────────────────────────────────────────────
     function savePosts() {
       localStorage.setItem('fb_news_posts', JSON.stringify(posts));
+    }
+
+    // ── LINKIFY BODY TEXT ──────────────────────────────────────────
+    function linkify(text) {
+      const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return escaped.replace(/(https?:\/\/[^\s&]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:underline">$1</a>');
     }
 
     // ── EMBED URL CONVERTER ────────────────────────────────────────
@@ -329,11 +360,12 @@
             <button class="news-item-delete" onclick="deletePost(${p.id})" title="Delete post">✕</button>
           </div>
           <div class="news-item-body">
-            ${p.text ? `<div class="news-item-text">${escHtml(p.text)}</div>` : ''}
+            ${p.text ? `<div class="news-item-text">${linkify(p.text)}</div>` : ''}
             ${p.embedUrl ? `
               <div class="news-item-video">
                 <iframe src="${p.embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
               </div>` : (p.videoUrl && !p.embedUrl ? `<p style="color:var(--muted);font-size:0.8rem;margin-top:0.75rem;font-family:'Share Tech Mono',monospace;">VIDEO: <a href="${escHtml(p.videoUrl)}" target="_blank" style="color:var(--cyan)">${escHtml(p.videoUrl)}</a></p>` : '')}
+            ${p.linkUrl ? `<a href="${escHtml(p.linkUrl)}" target="_blank" rel="noopener" class="source-link-btn">${escHtml(p.linkLabel || 'READ FULL STORY →')}</a>` : ''}
           </div>
         </div>
       `).join('');
