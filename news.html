@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Buddy News | Grocery Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #030810;
+      --panel: #0a0f1e;
+      --border: #1a2235;
+      --green: #39ff14;
+      --yellow: #FFE600;
+      --cyan: #00bbc3;
+      --text: #dde7e7;
+      --muted: #6b7a8d;
+      --red: #ff4444;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      background: var(--panel); border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    }
+    .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+    .logo-icon { width: 36px; height: 36px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--green); letter-spacing: 0.05em; }
+    .logo-text span { color: var(--text); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.4rem 0.9rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .nav-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .status-badge { display: flex; align-items: center; gap: 0.4rem; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--green); }
+    .status-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* PAGE HERO */
+    .page-hero {
+      background: linear-gradient(135deg, #0a0f1e 0%, #030810 60%);
+      padding: 2.5rem 1.5rem 2rem; text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--green); letter-spacing: 0.2em; margin-bottom: 0.75rem; }
+    .page-hero h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.1; }
+    .page-hero h1 span { color: var(--green); }
+
+    /* MAIN LAYOUT */
+    .main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ADMIN PANEL */
+    .admin-panel {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 1.5rem; margin-bottom: 2.5rem;
+    }
+    .admin-panel.hidden { display: none; }
+    .section-label { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--yellow); letter-spacing: 0.15em; margin-bottom: 1rem; }
+    .form-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; min-width: 200px; }
+    .form-group label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--cyan); letter-spacing: 0.1em; }
+    .tac-input {
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 0.65rem 0.9rem;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.85rem;
+      outline: none; transition: border-color 0.15s; width: 100%;
+    }
+    .tac-input::placeholder { color: var(--muted); }
+    .tac-input:focus { border-color: var(--cyan); }
+    textarea.tac-input { resize: vertical; min-height: 100px; font-family: 'Barlow', sans-serif; font-size: 0.875rem; line-height: 1.6; }
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .btn-primary { background: var(--green); color: #000; border: none; padding: 0.7rem 1.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary { background: transparent; color: var(--cyan); border: 1px solid var(--cyan); padding: 0.6rem 1.25rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { background: rgba(0,187,195,0.1); }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red); padding: 0.6rem 1.25rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; }
+    .btn-danger:hover { background: rgba(255,68,68,0.1); }
+    .type-toggle { display: flex; gap: 0; margin-bottom: 1rem; }
+    .type-btn { flex: 1; padding: 0.6rem; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s; }
+    .type-btn.active { background: rgba(57,255,20,0.1); border-color: var(--green); color: var(--green); }
+
+    /* ADMIN TOGGLE BAR */
+    .admin-toggle-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(57,255,20,0.05); border: 1px solid rgba(57,255,20,0.2);
+      padding: 0.75rem 1rem; margin-bottom: 2rem; cursor: pointer;
+    }
+    .admin-toggle-bar:hover { background: rgba(57,255,20,0.08); }
+    .admin-toggle-label { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--green); }
+    .admin-toggle-icon { font-size: 1rem; color: var(--green); transition: transform 0.2s; }
+    .admin-toggle-icon.open { transform: rotate(180deg); }
+
+    /* NEWS FEED */
+    .news-feed { display: flex; flex-direction: column; gap: 2rem; }
+    .news-empty { text-align: center; padding: 4rem 1rem; color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; }
+    .news-empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* NEWS ITEM */
+    .news-item { background: var(--panel); border: 1px solid var(--border); overflow: hidden; transition: border-color 0.2s; }
+    .news-item:hover { border-color: var(--cyan); }
+    .news-item-header { padding: 1.25rem 1.25rem 0.75rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .news-item-meta { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--cyan); letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .news-item-headline { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .news-item-delete { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0.25rem; flex-shrink: 0; transition: color 0.2s; }
+    .news-item-delete:hover { color: var(--red); }
+    .news-item-body { padding: 0 1.25rem 1.25rem; }
+    .news-item-text { font-size: 0.9rem; color: var(--text); line-height: 1.7; white-space: pre-wrap; }
+    .news-item-video { margin-top: 1rem; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+    .news-item-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    .news-type-badge { display: inline-block; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; padding: 0.15rem 0.45rem; margin-right: 0.5rem; vertical-align: middle; }
+    .badge-text { background: rgba(0,187,195,0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+    .badge-video { background: rgba(255,230,0,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
+    .badge-both { background: rgba(57,255,20,0.15); color: var(--green); border: 1px solid var(--green); }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 2rem; border-top: 1px solid var(--border); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+    footer a { color: var(--cyan); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .btn-row { flex-direction: column; }
+      .btn-primary, .btn-secondary, .btn-danger { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">
+      <div class="logo-icon">🥦</div>
+      <div class="logo-text">FOOD<span>BUDDY</span></div>
+    </a>
+    <div class="header-right">
+      <a href="index.html" class="nav-btn">← BACK TO APP</a>
+      <a href="https://ornate-faun-b042d9.netlify.app" class="nav-btn">🗺️ TRIP BUDDY</a>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        NEWS FEED
+      </div>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="page-tag">// FOOD BUDDY INTELLIGENCE //</div>
+    <h1>Food Buddy <span>News</span></h1>
+  </div>
+
+  <div class="main">
+
+    <!-- ADMIN TOGGLE -->
+    <div class="admin-toggle-bar" onclick="toggleAdmin()">
+      <span class="admin-toggle-label">+ ADD NEW STORY / VIDEO</span>
+      <span class="admin-toggle-icon" id="admin-icon">▼</span>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-panel hidden" id="admin-panel">
+      <div class="section-label">// NEW POST //</div>
+
+      <div class="type-toggle">
+        <button class="type-btn active" id="type-text-btn" onclick="setType('text')">📝 TEXT</button>
+        <button class="type-btn" id="type-video-btn" onclick="setType('video')">🎬 VIDEO</button>
+        <button class="type-btn" id="type-both-btn" onclick="setType('both')">📝 + 🎬 BOTH</button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label>HEADLINE *</label>
+          <input type="text" id="input-headline" class="tac-input" placeholder="e.g. Egg prices drop 12% this week at WinCo..." />
+        </div>
+        <div class="form-group">
+          <label>DATE (optional)</label>
+          <input type="text" id="input-date" class="tac-input" placeholder="e.g. May 21, 2026" />
+        </div>
+      </div>
+
+      <div class="form-group" id="text-group" style="margin-bottom:0.75rem">
+        <label>BODY TEXT</label>
+        <textarea id="input-text" class="tac-input" placeholder="Write your story here. Paste links, add details, notes — anything you want to share..."></textarea>
+      </div>
+
+      <div class="form-group hidden" id="video-group" style="margin-bottom:0.75rem">
+        <label>VIDEO URL (YouTube, Vimeo, or direct embed URL)</label>
+        <input type="text" id="input-video" class="tac-input" placeholder="https://www.youtube.com/watch?v=..." />
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="addPost()">+ PUBLISH POST</button>
+        <button class="btn-secondary" onclick="clearForm()">CLEAR</button>
+      </div>
+    </div>
+
+    <!-- NEWS FEED -->
+    <div class="news-feed" id="news-feed">
+      <div class="news-empty" id="empty-state">
+        <div class="news-empty-icon">📰</div>
+        <p>NO STORIES YET — CLICK "+ ADD NEW STORY" ABOVE TO PUBLISH YOUR FIRST POST</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>FOOD BUDDY NEWS // <a href="index.html">FOOD BUDDY APP</a> // <a href="https://tripbuddy.pro">TRIPBUDDY.PRO</a></p>
+  </footer>
+
+  <script>
+    // ── STATE ──────────────────────────────────────────────────────
+    let posts = JSON.parse(localStorage.getItem('fb_news_posts') || '[]');
+    let currentType = 'text';
+
+    // ── ADMIN TOGGLE ───────────────────────────────────────────────
+    function toggleAdmin() {
+      const panel = document.getElementById('admin-panel');
+      const icon = document.getElementById('admin-icon');
+      const isHidden = panel.classList.toggle('hidden');
+      icon.classList.toggle('open', !isHidden);
+    }
+
+    // ── POST TYPE ──────────────────────────────────────────────────
+    function setType(type) {
+      currentType = type;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('type-' + type + '-btn').classList.add('active');
+      document.getElementById('text-group').classList.toggle('hidden', type === 'video');
+      document.getElementById('video-group').classList.toggle('hidden', type === 'text');
+    }
+
+    // ── ADD POST ───────────────────────────────────────────────────
+    function addPost() {
+      const headline = document.getElementById('input-headline').value.trim();
+      const text = document.getElementById('input-text').value.trim();
+      const videoUrl = document.getElementById('input-video').value.trim();
+      const date = document.getElementById('input-date').value.trim()
+        || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      if (!headline) {
+        document.getElementById('input-headline').focus();
+        document.getElementById('input-headline').style.borderColor = 'var(--red)';
+        setTimeout(() => document.getElementById('input-headline').style.borderColor = '', 1500);
+        return;
+      }
+
+      const post = {
+        id: Date.now(),
+        type: currentType,
+        headline,
+        date,
+        text: currentType !== 'video' ? text : '',
+        videoUrl: currentType !== 'text' ? videoUrl : '',
+        embedUrl: currentType !== 'text' ? getEmbedUrl(videoUrl) : ''
+      };
+
+      posts.unshift(post);
+      savePosts();
+      renderFeed();
+      clearForm();
+
+      // Close admin panel after publish
+      document.getElementById('admin-panel').classList.add('hidden');
+      document.getElementById('admin-icon').classList.remove('open');
+    }
+
+    // ── CLEAR FORM ─────────────────────────────────────────────────
+    function clearForm() {
+      document.getElementById('input-headline').value = '';
+      document.getElementById('input-date').value = '';
+      document.getElementById('input-text').value = '';
+      document.getElementById('input-video').value = '';
+    }
+
+    // ── DELETE POST ────────────────────────────────────────────────
+    function deletePost(id) {
+      if (!confirm('Delete this post?')) return;
+      posts = posts.filter(p => p.id !== id);
+      savePosts();
+      renderFeed();
+    }
+
+    // ── SAVE ───────────────────────────────────────────────────────
+    function savePosts() {
+      localStorage.setItem('fb_news_posts', JSON.stringify(posts));
+    }
+
+    // ── EMBED URL CONVERTER ────────────────────────────────────────
+    function getEmbedUrl(url) {
+      if (!url) return '';
+      // YouTube watch URL
+      const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch) return 'https://www.youtube.com/embed/' + ytMatch[1];
+      // YouTube shorts
+      const ytShorts = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+      if (ytShorts) return 'https://www.youtube.com/embed/' + ytShorts[1];
+      // Vimeo
+      const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+      if (vimeoMatch) return 'https://player.vimeo.com/video/' + vimeoMatch[1];
+      // Already an embed URL or direct link
+      return url;
+    }
+
+    // ── RENDER FEED ────────────────────────────────────────────────
+    function renderFeed() {
+      const feed = document.getElementById('news-feed');
+      const empty = document.getElementById('empty-state');
+
+      if (posts.length === 0) {
+        feed.innerHTML = '';
+        feed.appendChild(empty);
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      const badgeClass = { text: 'badge-text', video: 'badge-video', both: 'badge-both' };
+      const badgeLabel = { text: 'TEXT', video: 'VIDEO', both: 'TEXT + VIDEO' };
+
+      feed.innerHTML = posts.map(p => `
+        <div class="news-item" id="post-${p.id}">
+          <div class="news-item-header">
+            <div>
+              <div class="news-item-meta">
+                <span class="news-type-badge ${badgeClass[p.type]}">${badgeLabel[p.type]}</span>
+                ${p.date.toUpperCase()}
+              </div>
+              <div class="news-item-headline">${escHtml(p.headline)}</div>
+            </div>
+            <button class="news-item-delete" onclick="deletePost(${p.id})" title="Delete post">✕</button>
+          </div>
+          <div class="news-item-body">
+            ${p.text ? `<div class="news-item-text">${escHtml(p.text)}</div>` : ''}
+            ${p.embedUrl ? `
+              <div class="news-item-video">
+                <iframe src="${p.embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+              </div>` : (p.videoUrl && !p.embedUrl ? `<p style="color:var(--muted);font-size:0.8rem;margin-top:0.75rem;font-family:'Share Tech Mono',monospace;">VIDEO: <a href="${escHtml(p.videoUrl)}" target="_blank" style="color:var(--cyan)">${escHtml(p.videoUrl)}</a></p>` : '')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── HELPERS ────────────────────────────────────────────────────
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── INIT ───────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      // Pre-fill today's date
+      document.getElementById('input-date').placeholder =
+        new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      renderFeed();
+    });
+  </script>
+
+</body>
+</html>
