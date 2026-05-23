@@ -239,6 +239,14 @@
     <p>Live price comparison, weekly ad intel, and store finder — all in one place.</p>
   </div>
 
+  <!-- ZIP CODE BANNER -->
+  <div id="zip-banner" style="background:#0a1628;border-bottom:1px solid #1a2235;padding:.6rem 1.5rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+    <span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#6b7a8d;letter-spacing:.1em;">📍 YOUR LOCATION:</span>
+    <input type="text" id="zip-banner-input" maxlength="5" placeholder="Enter ZIP code" style="background:#030810;border:1px solid #1a2235;color:#dde7e7;padding:.35rem .75rem;font-family:'Share Tech Mono',monospace;font-size:.8rem;width:110px;outline:none;" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+    <button onclick="saveZip()" style="background:#22c55e;color:#000;border:none;padding:.35rem .9rem;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.08em;cursor:pointer;">SET ZIP</button>
+    <span id="zip-status" style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#39ff14;"></span>
+  </div>
+
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('prices', this)">💰 PRICE SCOUT</button>
     <button class="tab-btn" onclick="switchTab('compare', this)">📊 WEEKLY COMPARISON</button>
@@ -251,6 +259,7 @@
     <!-- PRICE SCOUT -->
     <div id="tab-prices" class="tab-panel active">
       <div class="section-label">// PRICE SCOUT — COMPARE LIVE GROCERY PRICES //</div>
+      <div id="scout-zip-notice"></div>
       <div class="input-group">
         <input type="text" id="price-query" class="tac-input" placeholder="e.g. milk, eggs, bread, chicken..." />
         <button class="btn-primary" onclick="searchPrices()" id="price-btn">SCOUT PRICES</button>
@@ -258,7 +267,7 @@
       <div id="price-results">
         <div class="empty-state">
           <div class="empty-icon">🔍</div>
-          <p>Enter a grocery item above to compare live prices across stores</p>
+          <p>Enter a grocery item above to compare prices at stores near you</p>
         </div>
       </div>
     </div>
@@ -351,18 +360,72 @@
       if (tab === 'compare') renderComparison();
     }
 
+    // ── ZIP CODE MANAGEMENT ────────────────────────────────────────
+    function getSavedZip() {
+      return localStorage.getItem('fb_zip') || '';
+    }
+
+    function saveZip() {
+      const zip = document.getElementById('zip-banner-input').value.trim();
+      if (zip.length !== 5) {
+        document.getElementById('zip-status').textContent = '✗ Enter a valid 5-digit ZIP';
+        document.getElementById('zip-status').style.color = 'var(--red)';
+        return;
+      }
+      localStorage.setItem('fb_zip', zip);
+      updateZipStatus(zip);
+      // Refresh scout notice
+      updateScoutZipNotice(zip);
+    }
+
+    function updateZipStatus(zip) {
+      const statusEl = document.getElementById('zip-status');
+      if (!zip) { statusEl.textContent = ''; return; }
+      fetch('/.netlify/functions/scrape?action=check-zip&zip=' + zip)
+        .then(r => r.json())
+        .then(data => {
+          const stores = data.availableStores || [];
+          if (data.isOutsideCoverage) {
+            statusEl.style.color = 'var(--yellow)';
+            statusEl.textContent = '⚠ ZIP ' + zip + ' (' + (data.state||'?') + ') — Only Walmart available. PNW stores coming soon!';
+          } else if (data.isPNW) {
+            statusEl.style.color = 'var(--green)';
+            statusEl.textContent = '✓ ZIP ' + zip + ' (' + (data.state||'?') + ') — Full coverage: ' + stores.join(', ');
+          } else {
+            statusEl.style.color = 'var(--cyan)';
+            statusEl.textContent = '✓ ZIP ' + zip + ' (' + (data.state||'?') + ') — ' + stores.length + ' stores available';
+          }
+        })
+        .catch(() => {
+          statusEl.style.color = 'var(--green)';
+          statusEl.textContent = '✓ ZIP ' + zip + ' saved';
+        });
+    }
+
+    function updateScoutZipNotice(zip) {
+      const el = document.getElementById('scout-zip-notice');
+      if (!el) return;
+      if (!zip) {
+        el.innerHTML = '<div style="background:rgba(255,230,0,.07);border:1px solid rgba(255,230,0,.3);padding:.6rem 1rem;margin-bottom:1rem;font-family:Share Tech Mono,monospace;font-size:.75rem;color:var(--yellow);">📍 Set your ZIP code above to see prices at stores near you</div>';
+        return;
+      }
+      el.innerHTML = '<div style="background:rgba(57,255,20,.05);border:1px solid rgba(57,255,20,.2);padding:.5rem 1rem;margin-bottom:1rem;font-family:Share Tech Mono,monospace;font-size:.72rem;color:var(--green);">📍 Showing prices for ZIP ' + zip + ' — <a href="#" onclick="document.getElementById(\"zip-banner-input\").focus();return false;" style="color:var(--cyan);">change ZIP</a></div>';
+    }
+
     // ── PRICE SCOUT ────────────────────────────────────────────────
     async function searchPrices() {
       const query = document.getElementById('price-query').value.trim();
       if (!query) return;
+      const zip = getSavedZip();
       const btn = document.getElementById('price-btn');
       const resultsEl = document.getElementById('price-results');
       btn.disabled = true;
       btn.textContent = 'SCOUTING...';
-      resultsEl.innerHTML = '<div class="loading">SCANNING STORES FOR ' + query.toUpperCase() + '...</div>';
+      resultsEl.innerHTML = '<div class="loading">SCANNING STORES FOR ' + query.toUpperCase() + (zip ? ' NEAR ' + zip : '') + '...</div>';
 
       try {
-        const res = await fetch('/.netlify/functions/scrape?action=prices&query=' + encodeURIComponent(query));
+        const url = '/.netlify/functions/scrape?action=prices&query=' + encodeURIComponent(query) + (zip ? '&zip=' + zip : '');
+        const res = await fetch(url);
         const data = await res.json();
 
         if (!data.results || data.results.length === 0) {
@@ -373,18 +436,36 @@
         const prices = data.results.map(r => parseFloat(r.price.replace('$',''))).filter(p => !isNaN(p));
         const lowestPrice = Math.min(...prices);
 
-        let html = '<div class="summary-bar">'
+        // Coverage notice
+        let noticeHtml = '';
+        if (data.isOutsideCoverage) {
+          noticeHtml = '<div style="background:rgba(255,230,0,.07);border:1px solid rgba(255,230,0,.3);padding:.65rem 1rem;margin-bottom:1rem;font-family:Share Tech Mono,monospace;font-size:.75rem;color:var(--yellow);">'
+            + '⚠ Food Buddy currently covers the Pacific Northwest (OR, WA, ID) and select western states. '
+            + 'We are expanding soon! Showing Walmart pricing for your area.'
+            + '</div>';
+        } else if (data.isPNW) {
+          noticeHtml = '<div style="background:rgba(57,255,20,.05);border:1px solid rgba(57,255,20,.2);padding:.5rem 1rem;margin-bottom:1rem;font-family:Share Tech Mono,monospace;font-size:.72rem;color:var(--green);">'
+            + '✓ Full Pacific Northwest coverage — ' + data.storeCount + ' stores near ZIP ' + data.zip
+            + '</div>';
+        } else if (zip && data.state) {
+          noticeHtml = '<div style="background:rgba(0,187,195,.05);border:1px solid rgba(0,187,195,.2);padding:.5rem 1rem;margin-bottom:1rem;font-family:Share Tech Mono,monospace;font-size:.72rem;color:var(--cyan);">'
+            + '📍 ' + data.storeCount + ' stores available near ZIP ' + data.zip + ' (' + data.state + ')'
+            + '</div>';
+        }
+
+        let html = noticeHtml
+          + '<div class="summary-bar">'
           + '<div class="summary-item">QUERY: <span>' + query.toUpperCase() + '</span></div>'
-          + '<div class="summary-item">RESULTS: <span>' + data.results.length + '</span></div>'
+          + (zip ? '<div class="summary-item">ZIP: <span>' + zip + '</span></div>' : '')
+          + '<div class="summary-item">STORES: <span>' + data.results.length + '</span></div>'
           + '<div class="summary-item">BEST PRICE: <span>$' + lowestPrice.toFixed(2) + '</span></div>'
-          + '<div class="summary-item">UPDATED: <span>' + new Date(data.timestamp).toLocaleTimeString() + '</span></div>'
           + '</div><div class="results-grid">';
 
         data.results.forEach(item => {
           const price = parseFloat(item.price.replace('$',''));
           const isBest = price === lowestPrice;
           html += '<div class="result-card">'
-            + '<div class="result-store">' + item.store.toUpperCase() + '</div>'
+            + '<div class="result-store">' + (item.icon || '') + ' ' + item.store.toUpperCase() + '</div>'
             + '<div class="result-name">' + item.name + '</div>'
             + '<div class="result-price' + (isBest ? ' best' : '') + '">'
             + item.price
@@ -695,6 +776,17 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('price-query').addEventListener('keydown', e => { if (e.key === 'Enter') searchPrices(); });
       document.getElementById('zip-input').addEventListener('keydown', e => { if (e.key === 'Enter') findStores(); });
+      // Restore saved ZIP code
+      const savedZip = getSavedZip();
+      if (savedZip) {
+        document.getElementById('zip-banner-input').value = savedZip;
+        updateZipStatus(savedZip);
+        updateScoutZipNotice(savedZip);
+      } else {
+        updateScoutZipNotice('');
+      }
+      // Allow Enter key in zip banner
+      document.getElementById('zip-banner-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveZip(); });
       renderRecipes();
     });
   </script>
