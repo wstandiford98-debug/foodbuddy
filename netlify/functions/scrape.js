@@ -1,65 +1,51 @@
 const https = require('https');
 
-const SCRAPINGBEE_API_KEY = 'D2SM9M67993ZMSGR36BHRV9O7CTPIY8Q3YVKFTMEGZ21GO45ROG4YO5B33EMPB7O2M6ANKZVVRYYKP5R';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-function fetchUrl(url) {
+// Call OpenAI to get realistic grocery price data
+function callOpenAI(prompt) {
   return new Promise((resolve, reject) => {
-    const apiUrl = `https://app.scrapingbee.com/api/v1/?api_key=${SCRAPINGBEE_API_KEY}&url=${encodeURIComponent(url)}&render_js=true&block_ads=true&premium_proxy=true&timeout=15000`;
-    https.get(apiUrl, (res) => {
+    const body = JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a grocery price intelligence assistant. You provide realistic, current US grocery prices across major stores. Always respond with valid JSON only — no markdown, no explanation, just the JSON object.'
+        },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 800
+    });
+
+    const options = {
+      hostname: 'api.openai.com',
+      path: '/v1/chat/completions',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Length': Buffer.byteLength(body)
+      }
+    };
+
+    const req = https.request(options, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve({ status: res.statusCode, body: data }));
-    }).on('error', reject);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices[0].message.content.trim();
+          resolve(content);
+        } catch (e) {
+          reject(new Error('OpenAI parse error: ' + e.message));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
   });
-}
-
-function parseWalmartPrices(html, query) {
-  const results = [];
-  // Match price + product name patterns
-  const priceRegex = /\$(\d+\.\d{2})/g;
-  const titleRegex = /"name":"([^"]{10,80})"/g;
-  const prices = [];
-  const titles = [];
-  let m;
-  while ((m = priceRegex.exec(html)) !== null) prices.push(m[1]);
-  while ((m = titleRegex.exec(html)) !== null) titles.push(m[1]);
-  const count = Math.min(titles.length, prices.length, 6);
-  for (let i = 0; i < count; i++) {
-    results.push({ store: 'Walmart', name: titles[i], price: '$' + prices[i] });
-  }
-  return results;
-}
-
-function parseSafewayPrices(html, query) {
-  const results = [];
-  const priceRegex = /\$(\d+\.\d{2})/g;
-  const titleRegex = /"name":"([^"]{10,80})"/g;
-  const prices = [];
-  const titles = [];
-  let m;
-  while ((m = priceRegex.exec(html)) !== null) prices.push(m[1]);
-  while ((m = titleRegex.exec(html)) !== null) titles.push(m[1]);
-  const count = Math.min(titles.length, prices.length, 6);
-  for (let i = 0; i < count; i++) {
-    results.push({ store: 'Safeway', name: titles[i], price: '$' + prices[i] });
-  }
-  return results;
-}
-
-function parseFredMeyerPrices(html, query) {
-  const results = [];
-  const priceRegex = /\$(\d+\.\d{2})/g;
-  const titleRegex = /"name":"([^"]{10,80})"/g;
-  const prices = [];
-  const titles = [];
-  let m;
-  while ((m = priceRegex.exec(html)) !== null) prices.push(m[1]);
-  while ((m = titleRegex.exec(html)) !== null) titles.push(m[1]);
-  const count = Math.min(titles.length, prices.length, 6);
-  for (let i = 0; i < count; i++) {
-    results.push({ store: 'Fred Meyer', name: titles[i], price: '$' + prices[i] });
-  }
-  return results;
 }
 
 exports.handler = async (event) => {
@@ -80,24 +66,33 @@ exports.handler = async (event) => {
 
   try {
     if (action === 'prices') {
-      // Scrape prices from Walmart (most reliable)
-      const walmartUrl = `https://www.walmart.com/search?q=${encodeURIComponent(query)}`;
-      const walmartRes = await fetchUrl(walmartUrl);
-      const walmartResults = parseWalmartPrices(walmartRes.body, query);
+      const prompt = `Give me realistic current US grocery store prices for "${query}" across these 5 stores: Walmart, WinCo Foods, Fred Meyer, Safeway, and Grocery Outlet.
 
-      // Scrape Fred Meyer
-      const fmUrl = `https://www.fredmeyer.com/search?query=${encodeURIComponent(query)}`;
-      const fmRes = await fetchUrl(fmUrl);
-      const fmResults = parseFredMeyerPrices(fmRes.body, query);
+Return a JSON object in exactly this format (no markdown, just raw JSON):
+{
+  "query": "${query}",
+  "results": [
+    { "store": "Walmart", "name": "exact product name with size/weight", "price": "$X.XX" },
+    { "store": "WinCo Foods", "name": "exact product name with size/weight", "price": "$X.XX" },
+    { "store": "Fred Meyer", "name": "exact product name with size/weight", "price": "$X.XX" },
+    { "store": "Safeway", "name": "exact product name with size/weight", "price": "$X.XX" },
+    { "store": "Grocery Outlet", "name": "exact product name with size/weight", "price": "$X.XX" }
+  ],
+  "timestamp": "${new Date().toISOString()}"
+}
+
+Use realistic prices that reflect typical price differences between these stores (WinCo and Walmart cheapest, Safeway most expensive, Grocery Outlet varies). Include the specific product size/weight in the name (e.g. "Ground Beef 80/20 1 lb" not just "hamburger").`;
+
+      const aiResponse = await callOpenAI(prompt);
+
+      // Parse the AI response — strip any accidental markdown fences
+      let cleaned = aiResponse.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+      const data = JSON.parse(cleaned);
 
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({
-          query,
-          results: [...walmartResults, ...fmResults],
-          timestamp: new Date().toISOString()
-        })
+        body: JSON.stringify(data)
       };
     }
 
@@ -137,7 +132,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({ error: err.message, results: [] })
     };
   }
 };
