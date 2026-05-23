@@ -1,6 +1,6 @@
 const https = require('https');
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'sk-2K2GBE9BEQ5oDicc8QKXLc';
 
 // Call OpenAI to get realistic grocery price data
 function callOpenAI(prompt) {
