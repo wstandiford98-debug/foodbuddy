@@ -572,6 +572,11 @@
         + '<div>POTENTIAL SAVINGS VS. MOST EXPENSIVE: <strong style="color:var(--green)">$' + savings.toFixed(2) + '</strong> per basket</div>'
         + '</div>';
 
+      // Accuracy disclaimer
+      html += '<div style="margin-top:1.25rem; padding:0.85rem 1.25rem; background:rgba(0,187,195,0.07); border:1px solid rgba(0,187,195,0.25); font-family:\'Share Tech Mono\', monospace; font-size:0.78rem; color:var(--cyan); line-height:1.6;">'
+        + '⚠ The table above is only an estimate but for 100% accuracy check the store\'s weekly ads below.'
+        + '</div>';
+
       el.innerHTML = html;
     }
 
