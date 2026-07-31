@@ -233,7 +233,79 @@
       .food-scanner-qr { justify-self: center; order: -1; }
       .food-scanner-qr img { width: 132px; height: 132px; max-width: none; }
     }
-  </style>
+  
+    /* ── SMART CART DRAWER ── */
+    .smart-cart-btn {
+      border-color: var(--cyan) !important;
+      color: var(--cyan) !important;
+      position: relative;
+      background: transparent;
+    }
+    .smart-cart-btn:hover { background: rgba(0,187,195,0.12) !important; }
+    .smart-cart-btn.active {
+      background: rgba(0,187,195,0.15) !important;
+      box-shadow: 0 0 12px rgba(0,187,195,0.3);
+    }
+    #smart-cart-badge {
+      position: absolute; top: -6px; right: -6px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--yellow); color: #000;
+      font-size: 0.6rem; font-weight: 800;
+      display: none; align-items: center; justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    /* Overlay */
+    #sc-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 998; opacity: 0; pointer-events: none;
+      transition: opacity 0.28s cubic-bezier(0.23,1,0.32,1);
+    }
+    #sc-overlay.open { opacity: 1; pointer-events: auto; }
+    /* Drawer panel */
+    #smart-cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(480px, 100vw);
+      background: #07101f;
+      border-left: 1px solid var(--border);
+      z-index: 999;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.23,1,0.32,1);
+      box-shadow: -8px 0 40px rgba(0,0,0,0.6);
+    }
+    #smart-cart-drawer.open { transform: translateX(0); }
+    /* Drawer header */
+    .sc-drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: #0a0f1e;
+      flex-shrink: 0;
+    }
+    .sc-drawer-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem; font-weight: 800;
+      letter-spacing: 0.1em; color: var(--cyan);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .sc-close-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); width: 32px; height: 32px;
+      cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+    }
+    .sc-close-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    /* Drawer iframe */
+    #smart-cart-frame {
+      flex: 1; border: none; width: 100%;
+      background: #030810;
+    }
+    /* Mobile: full-width drawer */
+    @media (max-width: 520px) {
+      #smart-cart-drawer { width: 100vw; }
+    }
+</style>
 </head>
 <body>
 
@@ -245,6 +317,9 @@
     <div class="header-right">
       <a href="https://tripbuddy.pro/food-buddy-bites/" class="trip-buddy-btn" style="border-color:var(--yellow);color:var(--yellow);" target="_blank" rel="noopener">📰 FOOD BUDDY BITES</a>
       <a href="https://ornate-faun-b042d9.netlify.app" class="trip-buddy-btn">🗺️ TRIP BUDDY</a>
+      <button class="trip-buddy-btn smart-cart-btn" onclick="toggleSmartCart()" id="smart-cart-toggle" aria-label="Open Smart Cart">
+        🛒 SMART CART
+      </button>
       <div class="status-badge">
         <div class="status-dot"></div>
         INTEL ACTIVE
@@ -830,5 +905,63 @@
     });
   </script>
 
+
+  <!-- ── SMART CART OVERLAY + DRAWER ── -->
+  <div id="sc-overlay" onclick="closeSmartCart()"></div>
+  <div id="smart-cart-drawer" role="dialog" aria-label="Smart Cart" aria-modal="true">
+    <div class="sc-drawer-header">
+      <div class="sc-drawer-title">
+        🛒 SMART CART
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);font-weight:400;letter-spacing:0.15em;">AI-POWERED</span>
+      </div>
+      <button class="sc-close-btn" onclick="closeSmartCart()" aria-label="Close Smart Cart">✕</button>
+    </div>
+    <iframe
+      id="smart-cart-frame"
+      src="https://foodcartai-lztcutae.manus.space"
+      title="Food Buddy Smart Cart"
+      allow="clipboard-read; clipboard-write"
+      loading="lazy"
+    ></iframe>
+  </div>
+
+  <script>
+    // ── Smart Cart Drawer ──────────────────────────────────────────────────
+    const _scDrawer   = document.getElementById('smart-cart-drawer');
+    const _scOverlay  = document.getElementById('sc-overlay');
+    const _scToggle   = document.getElementById('smart-cart-toggle');
+    let   _scOpen     = false;
+    let   _scLoaded   = false;
+
+    function openSmartCart() {
+      _scOpen = true;
+      _scDrawer.classList.add('open');
+      _scOverlay.classList.add('open');
+      _scToggle.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      // Lazy-load the iframe src on first open
+      if (!_scLoaded) {
+        _scLoaded = true;
+        // iframe src already set; this is a no-op but kept for future lazy-load
+      }
+    }
+
+    function closeSmartCart() {
+      _scOpen = false;
+      _scDrawer.classList.remove('open');
+      _scOverlay.classList.remove('open');
+      _scToggle.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function toggleSmartCart() {
+      _scOpen ? closeSmartCart() : openSmartCart();
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && _scOpen) closeSmartCart();
+    });
+  </script>
 </body>
 </html>
