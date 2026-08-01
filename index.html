@@ -131,6 +131,18 @@
     .ad-card:hover { border-color: var(--yellow); }
     .ad-store-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--yellow); margin-bottom: 0.25rem; }
     .ad-description { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.4; }
+    /* CLIP TO CART BUTTON */
+    .ad-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .btn-clip {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(0,187,195,0.12); border: 1px solid var(--cyan);
+      color: var(--cyan); padding: 0.4rem 0.85rem;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem;
+      font-weight: 700; letter-spacing: 0.08em; cursor: pointer;
+      text-decoration: none; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-clip:hover { background: rgba(0,187,195,0.25); box-shadow: 0 0 10px rgba(0,187,195,0.25); }
+    .btn-clip.clipping { background: rgba(0,187,195,0.3); color: #fff; }
 
     /* SUMMARY BAR */
     .summary-bar {
@@ -385,32 +397,44 @@
         <div class="ad-card">
           <div class="ad-store-name">🛒 Walmart</div>
           <div class="ad-description">Browse this week's rollback prices and special buys across all departments.</div>
-          <a href="https://www.walmart.com/store/finder" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <div class="ad-actions"><a href="https://www.walmart.com/store/finder" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <button class="btn-clip" onclick="clipToCart('Walmart')" title="Open Smart Cart ready to clip from Walmart's weekly ad">🛒 CLIP TO CART</button>
+        </div>
         </div>
         <div class="ad-card">
           <div class="ad-store-name">🏪 Safeway</div>
           <div class="ad-description">Weekly specials, club card deals, and digital coupons available now.</div>
-          <a href="https://www.safeway.com/weeklyad" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <div class="ad-actions"><a href="https://www.safeway.com/weeklyad" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <button class="btn-clip" onclick="clipToCart('Safeway')" title="Open Smart Cart ready to clip from Safeway's weekly ad">🛒 CLIP TO CART</button>
+        </div>
         </div>
         <div class="ad-card">
           <div class="ad-store-name">🛍️ Fred Meyer</div>
           <div class="ad-description">Fred Meyer weekly ad with grocery, fuel, and general merchandise deals.</div>
-          <a href="https://www.fredmeyer.com/weeklyad" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <div class="ad-actions"><a href="https://www.fredmeyer.com/weeklyad" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <button class="btn-clip" onclick="clipToCart('Fred Meyer')" title="Open Smart Cart ready to clip from Fred Meyer's weekly ad">🛒 CLIP TO CART</button>
+        </div>
         </div>
         <div class="ad-card">
           <div class="ad-store-name">💰 Grocery Outlet</div>
           <div class="ad-description">Extreme value deals — up to 60% off name brands. New deals every week.</div>
-          <a href="https://www.groceryoutlet.com/circulars/storeid/152" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <div class="ad-actions"><a href="https://www.groceryoutlet.com/circulars/storeid/152" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <button class="btn-clip" onclick="clipToCart('Grocery Outlet')" title="Open Smart Cart ready to clip from Grocery Outlet's weekly ad">🛒 CLIP TO CART</button>
+        </div>
         </div>
         <div class="ad-card">
           <div class="ad-store-name">🌾 WinCo Foods</div>
           <div class="ad-description">Employee-owned, warehouse-style savings. Check current weekly specials.</div>
-          <a href="https://www.wincofoods.com/stores" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <div class="ad-actions"><a href="https://www.wincofoods.com/stores" target="_blank" rel="noopener" class="btn-secondary">VIEW WEEKLY AD →</a>
+          <button class="btn-clip" onclick="clipToCart('WinCo Foods')" title="Open Smart Cart ready to clip from WinCo Foods's weekly ad">🛒 CLIP TO CART</button>
+        </div>
         </div>
         <div class="ad-card">
           <div class="ad-store-name">🍖 Chef Store</div>
           <div class="ad-description">Restaurant supply pricing open to the public. Bulk savings on quality items.</div>
-          <a href="https://www.chefstore.com/locations/store/portland-587/" target="_blank" rel="noopener" class="btn-secondary">VIEW STORE →</a>
+          <div class="ad-actions"><a href="https://www.chefstore.com/locations/store/portland-587/" target="_blank" rel="noopener" class="btn-secondary">VIEW STORE →</a>
+          <button class="btn-clip" onclick="clipToCart('Chef Store')" title="Open Smart Cart ready to clip from Chef Store's weekly ad">🛒 CLIP TO CART</button>
+        </div>
         </div>
       </div>
     </div>
@@ -962,6 +986,21 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && _scOpen) closeSmartCart();
     });
+
+    // ── Clip to Cart: open drawer with store context ──────────────────────
+    function clipToCart(storeName) {
+      openSmartCart();
+      // Post a message to the Smart Cart iframe to show the store hint
+      setTimeout(() => {
+        const frame = document.getElementById('smart-cart-frame');
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage({
+            type: 'SMART_CART_CLIP_HINT',
+            storeName: storeName,
+          }, 'https://foodcartai-lztcutae.manus.space');
+        }
+      }, 400);
+    }
 
     // ── Auto-open drawer when user pastes an image anywhere on the page ──
     document.addEventListener('paste', e => {
