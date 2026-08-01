@@ -962,6 +962,42 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && _scOpen) closeSmartCart();
     });
+
+    // ── Auto-open drawer when user pastes an image anywhere on the page ──
+    document.addEventListener('paste', e => {
+      const items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      let hasImage = false;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) { hasImage = true; break; }
+      }
+      if (!hasImage) return;
+
+      // Open the drawer if it isn't already open
+      if (!_scOpen) openSmartCart();
+
+      // Give the iframe a moment to be visible, then forward the paste event
+      // by posting a message to the Smart Cart app
+      setTimeout(() => {
+        const frame = document.getElementById('smart-cart-frame');
+        if (!frame || !frame.contentWindow) return;
+        // Read the image blob and send it via postMessage so the Smart Cart
+        // can process it without needing a second Ctrl+V inside the iframe
+        const item = Array.from(e.clipboardData.items).find(i => i.type.startsWith('image/'));
+        if (!item) return;
+        const file = item.getAsFile();
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          frame.contentWindow.postMessage({
+            type: 'SMART_CART_PASTE_IMAGE',
+            dataUrl: evt.target.result,
+            mimeType: file.type,
+          }, 'https://foodcartai-lztcutae.manus.space');
+        };
+        reader.readAsDataURL(file);
+      }, 350);
+    });
   </script>
 </body>
 </html>
